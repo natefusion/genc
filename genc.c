@@ -60,8 +60,10 @@ gen_makefile(char * project_name) {
 	    "all: $(PROGRAM)\n"
 	    "$(PROGRAM): Makefile $(PROGRAM).c ; $(CC) $(PROGRAM).c -o $(PROGRAM) $(CFLAGS) $(DEBUGFLAGS) $(LDFLAGS)\n"
 	    "release: Makefile $(PROGRAM).c ; $(CC) $(PROGRAM).c -o $(PROGRAM) $(CFLAGS) $(RELEASEFLAGS) $(LDFLAGS)\n"
-	    "run: ; ./$(PROGRAM) $@\n",
-	    project_name);
+	    "run: ; ./$(PROGRAM) $@\n"
+        "install: ; $(shell ln -s ./$(PROGRAM) ~/.local/bin/)\n"
+        "uninstall: ; $(shell rm -f ~/.local/bin/$(PROGRAM)\n"
+	    , project_name);
     fclose(makefile_fp);
 }
 

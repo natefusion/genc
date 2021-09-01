@@ -13,3 +13,6 @@ $(PROGRAM): Makefile $(PROGRAM).c ; $(CC) $(PROGRAM).c -o $(PROGRAM) $(CFLAGS) $
 release: Makefile $(PROGRAM).c ; $(CC) $(PROGRAM).c -o $(PROGRAM) $(CFLAGS) $(LDFLAGS)
 
 run: ; ./$(PROGRAM) $@
+
+install: ; ln -s $(shell pwd)/$(PROGRAM) ~/.local/bin/
+uninstall: ; rm -f ~/.local/bin/$(PROGRAM)
