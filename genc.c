@@ -67,6 +67,16 @@ gen_makefile(char * project_name) {
     fclose(makefile_fp);
 }
 
+/*
+char * 
+generate_a_string() {
+    size_t size = 4;
+    char * str = (char *)malloc(sizeof(char) * size); // stored in the heap, just remember to clean up when you're done!
+    str = "abc\0";
+    return str;
+}
+*/
+
 void
 gen_src(char * project_name, const char * source) {
     char mainfilepath[255] = "";
@@ -82,7 +92,7 @@ gen_src(char * project_name, const char * source) {
 
         // probably fine
         char buffer[1000];
-        while (fgets(buffer, 1000, source_fp) != NULL) {
+        while (fgets(buffer, (int)sizeof * buffer, source_fp) != NULL) {
             fputs(buffer, mainfile_fp);
         }
 
@@ -174,8 +184,6 @@ void rename_project(char * old_project_name, char * new_project_name) {
         exit(1);
     }
 
-    // TODO. BAD, THIS IS BAD, IT MUST ONLY CHANGE WHAT IS NEEDED, NOT BE REPLACED WITH A TEMPLATE
-    // Re-create Makefile
     char makefile[255] = "";
     strcat(makefile, new_project_name);
     strcat(makefile, "/Makefile");
@@ -188,7 +196,7 @@ void rename_project(char * old_project_name, char * new_project_name) {
     char buffer[255] = "";
     
     int count = 0;
-    while (fgets(buffer, 255, makefile_fp) != NULL) {
+    while (fgets(buffer, (int)sizeof * buffer, makefile_fp) != NULL) {
 	count++;
 
 	if (count == 1) {
@@ -219,7 +227,6 @@ main(int argc, char * argv[]) {
             init_project(argv[2], argv[3]);
     } else if (!strcmp(argv[1], "rename") && argc == 4) {
         rename_project(argv[2], argv[3]);
-        //printf("Please fix the TODO in rename_project before using this feature\n");
     } else {
         printf("%s\n", HELP_MESSAGE);
         exit(1);
