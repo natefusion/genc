@@ -16,7 +16,8 @@ const char * HELP_MESSAGE =
     "USAGE: genc ...\n"
     "\n"
     "COMMANDS:\n"
-    "    init           Create a new c project\n"
+    "    init <project_name>                         Create a new c project\n"
+    "    init <project_name> <custom_source_file>    Create a new c project with your own source file\n"
     "\n"
     "EXAMPLES:\n"
     "    The following example creates a new c project in the current directory.\n"
@@ -52,7 +53,7 @@ gen_makefile(char * project_name) {
     fprintf(makefile_fp,
 	    "PROGRAM = %s\n"
 	    "CC = gcc\n"
-	    "CFLAGS = -Wall -Werror -Wextra -Wpedantic -Wformat=2 -Wformat-overflow=2 -Wformat-truncation=2 -Wformat-security -Wnull-dereference -Wstack-protector -Wtrampolines -Walloca -Wvla -Warray-bounds=2 -Wimplicit-fallthrough=3 -Wtraditional-conversion -Wshift-overflow=2 -Wcast-qual -Wstringop-overflow=4 -Wconversion -Warith-conversion -Wlogical-op -Wduplicated-cond -Wduplicated-branches -Wformat-signedness -Wshadow -Wstrict-overflow=4 -Wundef -Wstrict-prototypes -Wswitch-default -Wswitch-enum -Wstack-usage=1000000 -Wcast-align=strict -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fstack-clash-protection -fPIE -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wl,-z,separate-code -pipe -O2 -std=c11\n"
+	    "CFLAGS = -Wall -Werror -Wextra -Wpedantic -Wformat=2 -Wformat-overflow=2 -Wformat-truncation=2 -Wformat-security -Wnull-dereference -Wstack-protector -Wtrampolines -Walloca -Wvla -Warray-bounds=2 -Wimplicit-fallthrough=3 -Wtraditional-conversion -Wshift-overflow=2 -Wcast-qual -Wstringop-overflow=4 -Wconversion -Warith-conversion -Wlogical-op -Wduplicated-cond -Wduplicated-branches -Wformat-signedness -Wshadow -Wstrict-overflow=4 -Wundef -Wstrict-prototypes -Wswitch-default -Wswitch-enum -Wstack-usage=1000000 -Wcast-align=strict -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fstack-clash-protection -fPIE -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wl,-z,separate-code -pipe -O2\n"
 	    "DEBUGFLAGS = -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=leak -fno-omit-frame-pointer -fsanitize=undefined -fsanitize=bounds-strict -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow $(shell export ASAN_OPTIONS=strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_invalid_pointer_pairs=2) -fanalyzer\n"
 	    "LDFLAGS = \n"
 	    "\n"
@@ -67,13 +68,27 @@ gen_makefile(char * project_name) {
 }
 
 void
-gen_sample_src(char * project_name) {
+gen_src(char * project_name, const char * source) {
     char mainfilepath[255] = "";
     MAKE_SOURCE_FILE(mainfilepath, project_name, project_name);
     strcat(mainfilepath, ".c");
     
     FILE * mainfile_fp = gen_file(mainfilepath);
-    fputs(MAINFILE, mainfile_fp);
+
+    if (!strcmp(source, MAINFILE)) {
+        fputs(source, mainfile_fp);
+    } else {
+        FILE * source_fp = fopen(source, "r");
+
+        // probably fine
+        char buffer[1000];
+        while (fgets(buffer, 1000, source_fp) != NULL) {
+            fputs(buffer, mainfile_fp);
+        }
+
+        fclose(source_fp);
+    }
+
     fclose(mainfile_fp);
 }
 
@@ -106,7 +121,7 @@ gen_git_dir(char * project_name) {
 }
 
 void
-init_project(char * project_name) {
+init_project(char * project_name, char * source_file) {
     // Generate project directory
     int exists = mkdir(project_name, 0777);
 
@@ -116,7 +131,13 @@ init_project(char * project_name) {
     }
 
     gen_makefile(project_name);
-    gen_sample_src(project_name);
+
+    if (source_file == NULL) {
+        gen_src(project_name, MAINFILE);
+    } else {
+        gen_src(project_name, source_file);
+    }
+    
     gen_git_dir(project_name);
 }
 
@@ -191,8 +212,11 @@ void rename_project(char * old_project_name, char * new_project_name) {
 int
 main(int argc, char * argv[]) {
     // Make folders for debug/release binaries, like cargo
+    // The ability to insert more than one custom source file
     if (!strcmp(argv[1], "init") && argc == 3) {
-        init_project(argv[2]);
+        init_project(argv[2], NULL);
+    } else if (!strcmp(argv[1], "init") && argc == 4) {
+            init_project(argv[2], argv[3]);
     } else if (!strcmp(argv[1], "rename") && argc == 4) {
         rename_project(argv[2], argv[3]);
         //printf("Please fix the TODO in rename_project before using this feature\n");
