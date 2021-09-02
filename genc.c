@@ -55,15 +55,15 @@ gen_makefile(char * project_name) {
             "CC = gcc\n"
             "CFLAGS = -Wall -Werror -Wextra -Wpedantic -Wformat=2 -Wformat-overflow=2 -Wformat-truncation=2 -Wformat-security -Wnull-dereference -Wstack-protector -Wtrampolines -Walloca -Wvla -Warray-bounds=2 -Wimplicit-fallthrough=3 -Wtraditional-conversion -Wshift-overflow=2 -Wcast-qual -Wstringop-overflow=4 -Wconversion -Warith-conversion -Wlogical-op -Wduplicated-cond -Wduplicated-branches -Wformat-signedness -Wshadow -Wstrict-overflow=4 -Wundef -Wstrict-prototypes -Wswitch-default -Wswitch-enum -Wstack-usage=1000000 -Wcast-align=strict -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fstack-clash-protection -fPIE -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wl,-z,separate-code -pipe -O2\n"
             "DEBUGFLAGS = -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=leak -fno-omit-frame-pointer -fsanitize=undefined -fsanitize=bounds-strict -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow $(shell export ASAN_OPTIONS=strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_invalid_pointer_pairs=2) -fanalyzer\n"
-	    "LDFLAGS = \n"
-	    "\n"
-	    "all: $(PROGRAM)\n"
-	    "$(PROGRAM): Makefile $(PROGRAM).c ; $(CC) $(PROGRAM).c -o $(PROGRAM) $(CFLAGS) $(DEBUGFLAGS) $(LDFLAGS)\n"
-	    "release: Makefile $(PROGRAM).c ; $(CC) $(PROGRAM).c -o $(PROGRAM) $(CFLAGS) $(LDFLAGS)\n"
-	    "run: ; ./$(PROGRAM) $@\n"
+            "LDFLAGS = \n"
+            "\n"
+            "all: $(PROGRAM)\n"
+            "$(PROGRAM): Makefile $(PROGRAM).c ; $(CC) $(PROGRAM).c -o $(PROGRAM) $(CFLAGS) $(DEBUGFLAGS) $(LDFLAGS)\n"
+            "release: Makefile $(PROGRAM).c ; $(CC) $(PROGRAM).c -o $(PROGRAM) $(CFLAGS) $(LDFLAGS)\n"
+            "run: ; ./$(PROGRAM) $@\n"
             "install: ; $(shell ln -s ./$(PROGRAM) ~/.local/bin/)\n"
             "uninstall: ; $(shell rm -f ~/.local/bin/$(PROGRAM)\n"
-	    , project_name);
+            , project_name);
     fclose(makefile_fp);
 }
 
@@ -195,18 +195,18 @@ void rename_project(char * old_project_name, char * new_project_name) {
     
     int count = 0;
     while (fgets(buffer, (int)sizeof * buffer, makefile_fp) != NULL) {
-	count++;
+        count++;
 
-	if (count == 1) {
-	    if (strncmp(buffer, "PROGRAM = ", (size_t)10)) {
-		fprintf(stderr, "Your Makefile must start with \"PROGRAM = <program_name>\"\n");
-		exit(1);
-	    }
+        if (count == 1) {
+            if (strncmp(buffer, "PROGRAM = ", (size_t)10)) {
+                fprintf(stderr, "Your Makefile must start with \"PROGRAM = <program_name>\"\n");
+                exit(1);
+            }
 
-	    fprintf(makefile_new_fp, "PROGRAM = %s\n", new_project_name);
-	} else {
-	    fputs(buffer, makefile_new_fp);
-	}
+            fprintf(makefile_new_fp, "PROGRAM = %s\n", new_project_name);
+        } else {
+            fputs(buffer, makefile_new_fp);
+        }
     }
 
     fclose(makefile_new_fp);
