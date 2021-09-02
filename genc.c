@@ -104,8 +104,6 @@ gen_src(char * project_name, const char * source) {
 
 void
 gen_git_dir(char * project_name) {
-    // TODO Make gitignore file
-    
     // With help from https://libgit2.org/docs/guides/101-samples/
     git_libgit2_init(); 
     git_repository * repo = NULL;
