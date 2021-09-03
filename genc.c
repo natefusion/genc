@@ -61,8 +61,8 @@ gen_makefile(char * project_name) {
             "all: $(PROGRAM)\n"
             "$(PROGRAM): Makefile $(PROGRAM).c ; $(CC) $(PROGRAM).c -o $(PROGRAM) $(CFLAGS) $(DEBUGFLAGS) $(LDFLAGS)\n"
             "release: Makefile $(PROGRAM).c ; $(CC) $(PROGRAM).c -o $(PROGRAM) $(CFLAGS) $(LDFLAGS)\n"
-            "install: ; $(shell ln -s ./$(PROGRAM) ~/.local/bin/)\n"
-            "uninstall: ; $(shell rm -f ~/.local/bin/$(PROGRAM)\n"
+            "install: ; shell ln -s ./$(PROGRAM) ~/.local/bin/\n"
+            "uninstall: ; shell rm -f ~/.local/bin/$(PROGRAM)\n"
             , project_name);
     fclose(makefile_fp);
 }
@@ -188,7 +188,8 @@ void rename_project(char * old_project_name, char * new_project_name) {
     FILE * makefile_fp = fopen(makefile, "r");
 
     char new_makefile[255] = "";
-    strcat(new_makefile, ".tmp");
+    strcat(new_makefile, new_project_name);
+    strcat(new_makefile, "/Makefile.tmp");
     FILE * makefile_new_fp = fopen(new_makefile, "w");
 
     char buffer[255] = "";
