@@ -150,7 +150,8 @@ init_project(char * project_name, char * source_file) {
 }
 
 // this function is VERY inefficient
-void rename_project(char * old_project_name, char * new_project_name) {
+void
+rename_project(char * old_project_name, char * new_project_name) {
     char old_filepath[255] = "";
     MAKE_SOURCE_FILE(old_filepath, new_project_name, old_project_name);
     strcat(old_filepath, ".c");
@@ -182,6 +183,7 @@ void rename_project(char * old_project_name, char * new_project_name) {
         exit(1);
     }
 
+    // Modify makefile
     char makefile[255] = "";
     strcat(makefile, new_project_name);
     strcat(makefile, "/Makefile");
