@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <git2.h>
 
@@ -78,27 +77,14 @@ gen_makefile(char * project_name) {
 */
 
 void
-gen_src(char * project_name, const char * source) {
+gen_src(char * project_name) {
     char mainfilepath[255] = "";
     MAKE_SOURCE_FILE(mainfilepath, project_name, project_name);
     strcat(mainfilepath, ".c");
     
     FILE * mainfile_fp = gen_file(mainfilepath);
 
-    if (!strcmp(source, MAINFILE)) {
-        fputs(source, mainfile_fp);
-    } else {
-        FILE * source_fp = fopen(source, "r");
-
-        // probably fine
-        char buffer[1000];
-        while (fgets(buffer, (int)sizeof * buffer, source_fp) != NULL) {
-            fputs(buffer, mainfile_fp);
-        }
-
-        fclose(source_fp);
-    }
-
+    fputs(MAINFILE, mainfile_fp);
     fclose(mainfile_fp);
 }
 
@@ -129,22 +115,22 @@ gen_git_dir(char * project_name) {
 }
 
 void
-init_project(char * project_name, char * source_file) {
-    // Generate project directory
-    int exists = mkdir(project_name, 0777);
+gen_dir(char * filepath) {
+    int exists = mkdir(filepath, 0777);
 
     if (exists) {
-        fprintf(stderr, "Directory already exists\n");
+        fprintf(stderr, "File or directory already exists\n");
         exit(1);
     }
+}
+
+void
+init_project(char * project_name) {
+    gen_dir(project_name);
 
     gen_makefile(project_name);
 
-    if (source_file == NULL) {
-        gen_src(project_name, MAINFILE);
-    } else {
-        gen_src(project_name, source_file);
-    }
+    gen_src(project_name);
     
     gen_git_dir(project_name);
 }
@@ -221,9 +207,7 @@ main(int argc, char * argv[]) {
     // Make folders for debug/release binaries, like cargo
     // The ability to insert more than one custom source file
     if (!strcmp(argv[1], "init") && argc == 3) {
-        init_project(argv[2], NULL);
-    } else if (!strcmp(argv[1], "init") && argc == 4) {
-        init_project(argv[2], argv[3]);
+        init_project(argv[2]);
     } else if (!strcmp(argv[1], "rename") && argc == 4) {
         rename_project(argv[2], argv[3]);
     } else {
