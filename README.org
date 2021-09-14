@@ -16,6 +16,7 @@ The default file structure is like so:
 * Build instructions
 ** Requirements
 [[https://libgit2.org][libgit2]]
+[[https://www.gnu.org/software/make/][GNU Make]]
 ** How to Build
 #+BEGIN_SRC sh
 $ make release
