@@ -30,23 +30,23 @@ $ make install
 $ make uninstall
 #+END_SRC
 * Examples
-** Creating a new project
+** Create a new project
 #+BEGIN_SRC sh
 $ genc init <project name>
 #+END_SRC
-** Building a project with debug flags
+** Build a project with debug flags
 #+BEGIN_SRC sh
 $ make
 #+END_SRC
-** Building a project without debug flags
+** Build a project without debug flags
 #+BEGIN_SRC sh
 $ make release
 #+END_SRC
-** Running a debug build
+** Run a debug build
 #+BEGIN_SRC sh
 $ make run
 #+END_SRC
-** Running a debug build with commandline arguments
+** Run a debug build with commandline arguments
 #+BEGIN_SRC sh
 $ make run a="arg1 arg2 arg3"
 #+END_SRC
