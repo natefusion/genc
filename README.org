@@ -3,19 +3,16 @@ This is a C project generator. I designed it to mimic [[https://github.com/rust-
 on a surface level.
 
 The default file structure is like so:
-
-#+BEGIN_VERSE
-<project name>
-├── Makefile
-├── src
-│   ├── Makefile
-│   └── main.c
-└── target
-    ├── debug
-    │   └── <project name>
-    └── release
-        └── <project name>
-#+END_VERSE
+| <project name>
+ | Makefile
+ | src
+  | Makefile
+  | main.c
+ | target
+  | debug
+   | <project name>
+  | release
+   | <project name>
 
 Currently there is only one command, and it works like so:
 #+BEGIN_SRC sh
