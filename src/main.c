@@ -27,7 +27,7 @@ const char * MAINFILE =
 
 const char * MAKEFILE =
     "PROJECT = $(notdir $(CURDIR))\n"
-    "SRC = $(wildcard *.c)\n"
+    "SRC = $(wildcard src/*.c)\n"
     "DEBUG = debug/$(PROJECT)\n"
     "RELEASE = release/$(PROJECT)\n"
     "CC = gcc\n"
@@ -62,9 +62,12 @@ const char * MAKEFILE =
     "uninstall:\n"
     "	rm -f ~/.local/bin/$(PROJECT)\n";
 
-const char * GITIGNORE =
-    "debug\n"
-    "release\n";
+const char * SRC_MAKEFILE =
+    "all:\n"
+    "	$(MAKE) -C .. $@\n"
+    "%:\n"
+    "	$(MAKE) -C .. $@\n";
+
 
 void
 gen_dir(char * filepath) {
@@ -89,9 +92,9 @@ gen_file(char * filepath, const char * contents) {
     fclose(fp);
 }
 
-void gen_mainfile(char * filepath)  { gen_file(filepath, MAINFILE);  }
-void gen_makefile(char * filepath)  { gen_file(filepath, MAKEFILE);  }
-void gen_gitignore(char * filepath) { gen_file(filepath, GITIGNORE); }
+void gen_mainfile(char * filepath)    { gen_file(filepath, MAINFILE);  }
+void gen_makefile(char * filepath)    { gen_file(filepath, MAKEFILE);  }
+void gen_srcmakefile(char * filepath) { gen_file(filepath, SRC_MAKEFILE); }
 
 void
 gen_git_dir(char * project_name) {
@@ -124,7 +127,7 @@ _write(char * to, const char * from, int offset, int length, void (*action)(char
 void
 init_project(char * project_name)  {
     int i_len = (int)strlen(project_name);
-    int f_len = 11; // make sure this matches with the longest static string
+    int f_len = 13; // make sure this matches with the longest static string
     int len = i_len + f_len + 1;
 
     char * project_folder = (char *)malloc(sizeof(char) * (size_t)len);
@@ -136,12 +139,12 @@ init_project(char * project_name)  {
     _write(project_folder, project_name, 0, i_len, &gen_dir);
     gen_git_dir(project_name);    
     // try to keep these in order from smallest to largest to maybe avoid buffer overflow bugs
-    _write(project_folder, "/debug",      i_len, 6,     &gen_dir);
-    _write(project_folder, "/main.c",     i_len, 7,     &gen_mainfile);
-    _write(project_folder, "/release",    i_len, 8,     &gen_dir);
-    _write(project_folder, "/Makefile",   i_len, 9,     &gen_makefile);
-    _write(project_folder, "/.gitignore", i_len, f_len, &gen_gitignore);
-
+    _write(project_folder, "/src",          i_len, 4,     &gen_dir);
+    _write(project_folder, "/debug",        i_len, 6,     &gen_dir);
+    _write(project_folder, "/release",      i_len, 8,     &gen_dir);
+    _write(project_folder, "/Makefile",     i_len, 9,     &gen_makefile);
+    _write(project_folder, "/src/main.c",   i_len, 11,    &gen_mainfile);
+    _write(project_folder, "/src/Makefile", i_len, f_len,    &gen_srcmakefile); 
 
     free(project_folder);
 }
