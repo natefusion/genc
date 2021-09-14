@@ -13,11 +13,6 @@ The default file structure is like so:
    | <project name>
   | release
    | <project name>
-
-Currently there is only one command, and it works like so:
-#+BEGIN_SRC sh
-$ genc init <project name>
-#+END_SRC
 * Build instructions
 ** Requirements
 [[https://libgit2.org][libgit2]]
@@ -29,4 +24,33 @@ $ make release
 Note: Default installation path is ~/.local/bin
 #+BEGIN_SRC sh
 $ make install
+#+END_SRC
+** Uninstallation
+#+BEGIN_SRC sh
+$ make uninstall
+#+END_SRC
+* Examples
+** Creating a new project
+#+BEGIN_SRC sh
+$ genc init <project name>
+#+END_SRC
+** Building a project with debug flags
+#+BEGIN_SRC sh
+$ make
+#+END_SRC
+** Building a project without debug flags
+#+BEGIN_SRC sh
+$ make release
+#+END_SRC
+** Running a debug build
+#+BEGIN_SRC sh
+$ make run
+#+END_SRC
+** Running a debug build with commandline arguments
+#+BEGIN_SRC sh
+$ make run a="arg1 arg2 arg3"
+#+END_SRC
+** Remove debug and release builds
+#+BEGIN_SRC sh
+$ make clean
 #+END_SRC
