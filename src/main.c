@@ -144,7 +144,7 @@ init_project(char * project_name)  {
     _write(project_folder, "/release",      i_len, 8,     &gen_dir);
     _write(project_folder, "/Makefile",     i_len, 9,     &gen_makefile);
     _write(project_folder, "/src/main.c",   i_len, 11,    &gen_mainfile);
-    _write(project_folder, "/src/Makefile", i_len, f_len,    &gen_srcmakefile); 
+    _write(project_folder, "/src/Makefile", i_len, f_len, &gen_srcmakefile); 
 
     free(project_folder);
 }
