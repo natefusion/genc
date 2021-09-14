@@ -21,7 +21,7 @@ executable: $(SRC)
 
 .PHONY: run clean install uninstall
 
-# write "make run a=... for commandline arguments"
+# write "make run a="..." for commandline arguments"
 run:
 	./$(DEBUG) $(a)
 
