@@ -1,0 +1,35 @@
+* Description
+This is a C project generator. I designed it to mimic [[https://github.com/rust-lang/cargo][cargo]], at least
+on a surface level.
+
+The default file structure is like so:
+
+#+BEGIN_VERSE
+<project name>
+├── Makefile
+├── src
+│   ├── Makefile
+│   └── main.c
+└── target
+    ├── debug
+    │   └── <project name>
+    └── release
+        └── <project name>
+#+END_VERSE
+
+Currently there is only one command, and it works like so:
+#+BEGIN_SRC sh
+$ genc init <project name>
+#+END_SRC
+* Build instructions
+** Requirements
+[[https://libgit2.org][libgit2]]
+** How to Build
+#+BEGIN_SRC sh
+$ make release
+#+END_SRC
+** Installation
+Note: Default installation path is ~/.local/bin
+#+BEGIN_SRC sh
+$ make install
+#+END_SRC

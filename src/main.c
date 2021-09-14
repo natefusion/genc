@@ -153,22 +153,10 @@ init_project(char * project_name)  {
     free(project_folder);
 }
 
-void
-rename_project(char * old_project_name, char * new_project_name) {
-    int folder_fail = rename(old_project_name, new_project_name);
-
-    if (folder_fail) {
-        fprintf(stderr, "Could not rename project folder\n");
-        exit(1);
-    }
-}
-
 int
 main(int argc, char ** argv) {
     if (argc == 3 && !strncmp(argv[1], "init", (size_t)4)) {
         init_project(argv[2]);
-    } else if (argc == 4 && !strncmp(argv[1], "rename", (size_t)6)) {
-        rename_project(argv[2], argv[3]);
     } else {
         puts(HELP_MESSAGE);
         exit(1);
