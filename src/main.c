@@ -139,7 +139,7 @@ init_project(char * project_name)  {
         project_folder[i] = '\0';
 
     _write(project_folder, project_name, 0, i_len, &gen_dir);
-    gen_git_dir(project_name);    
+
     // try to keep these in order from smallest to largest to maybe avoid buffer overflow bugs
     _write(project_folder, "/src",            i_len, 4,     &gen_dir);
     _write(project_folder, "/target",         i_len, 7,     &gen_dir);
@@ -149,6 +149,7 @@ init_project(char * project_name)  {
     _write(project_folder, "/src/Makefile",   i_len, 13,    &gen_srcmakefile); 
     _write(project_folder, "/target/debug",   i_len, 13,    &gen_dir);
     _write(project_folder, "/target/release", i_len, f_len, &gen_dir);
+    gen_git_dir(project_name);
 
     free(project_folder);
 }
