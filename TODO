@@ -1,0 +1,3 @@
+Incremental build support
+Complex project support (lots of files)
+Add dependencies with a command (like genc add dep)
