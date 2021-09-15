@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <git2.h>
 
-const char * HELP_MESSAGE =
+const char HELP_MESSAGE[] =
     "C project generator\n"
     "\n"
     "USAGE: genc ...\n"
@@ -16,7 +16,7 @@ const char * HELP_MESSAGE =
     "    The following example creates a new c project in the current directory.\n"
     "    $ genc init my-new-project\n";
 
-const char * MAINFILE =
+const char MAINFILE[] =
     "#include <stdio.h>\n"
     "\n"
     "int\n"
@@ -24,7 +24,7 @@ const char * MAINFILE =
     "    printf(\"Hello world!\\n\");\n"
     "}\n";
 
-const char * MAKEFILE =
+const char MAKEFILE[] =
     "PROJECT = $(notdir $(CURDIR))\n"
     "SRC = $(wildcard src/*.c)\n"
     "DEBUG = target/debug/$(PROJECT)\n"
@@ -62,7 +62,7 @@ const char * MAKEFILE =
     "uninstall:\n"
     "	rm -f ~/.local/bin/$(PROJECT)\n";
 
-const char * SRC_MAKEFILE =
+const char SRC_MAKEFILE[] =
     "all:\n"
     "	$(MAKE) -C .. $@\n"
     "%:\n"
@@ -70,7 +70,7 @@ const char * SRC_MAKEFILE =
 
 
 void
-gen_dir(char * filepath) {
+gen_dir(char filepath[]) {
     int exists = mkdir(filepath, 0777);
 
     if (exists) {
@@ -80,7 +80,7 @@ gen_dir(char * filepath) {
 }
 
 void
-gen_file(char * filepath, const char * contents) {
+gen_file(char filepath[], const char contents[]) {
     FILE * fp = fopen(filepath, "w");
     
     if (fp == NULL) {
@@ -92,13 +92,13 @@ gen_file(char * filepath, const char * contents) {
     fclose(fp);
 }
 
-void gen_mainfile(char * filepath)    { gen_file(filepath, MAINFILE);     }
-void gen_makefile(char * filepath)    { gen_file(filepath, MAKEFILE);     }
-void gen_gitignore(char * filepath)   { gen_file(filepath, "");           }
-void gen_srcmakefile(char * filepath) { gen_file(filepath, SRC_MAKEFILE); }
+void gen_mainfile(char filepath[])    { gen_file(filepath, MAINFILE);     }
+void gen_makefile(char filepath[])    { gen_file(filepath, MAKEFILE);     }
+void gen_gitignore(char filepath[])   { gen_file(filepath, "");           }
+void gen_srcmakefile(char filepath[]) { gen_file(filepath, SRC_MAKEFILE); }
 
 void
-gen_git_dir(char * project_name) {
+gen_git_dir(char project_name[]) {
     // With help from https://libgit2.org/docs/guides/101-samples/
     git_libgit2_init(); 
     git_repository * repo = NULL;
@@ -118,7 +118,7 @@ gen_git_dir(char * project_name) {
 
 // Calling this function "write" causes weird function shadowing issues caused by the libgit2 library
 void
-_write(char * to, const char * from, int offset, int length, void (*action)(char *)) {
+_write(char to[], const char from[], int offset, int length, void (*action)(char [])) {
     for (int i = 0; i < length; i++)
         to[i + offset] = from[i];
 
@@ -126,7 +126,7 @@ _write(char * to, const char * from, int offset, int length, void (*action)(char
 }
 
 void
-init_project(char * project_name)  {
+init_project(char project_name[])  {
     int i_len = (int)strlen(project_name);
     int f_len = 15; // make sure this matches with the longest static string
     int len = i_len + f_len + 1;
@@ -154,7 +154,7 @@ init_project(char * project_name)  {
 }
 
 int
-main(int argc, char ** argv) {
+main(int argc, char * argv[]) {
     if (argc == 3 && !strncmp(argv[1], "init", (size_t)4)) {
         init_project(argv[2]);
     } else {
