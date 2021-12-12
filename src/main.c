@@ -10,7 +10,8 @@ const char HELP_MESSAGE[] =
     "USAGE: genc ...\n"
     "\n"
     "COMMANDS:\n"
-    "    init <project_name> Create a new c project\n"
+    "    init     <project_name> Create a new c project\n"
+    "    makefile                Prints the template makefile to stdout\n"
     "\n"
     "EXAMPLES:\n"
     "    The following example creates a new c project in the current directory.\n"
@@ -157,8 +158,10 @@ int
 main(int argc, char * argv[]) {
     if (argc == 3 && !strncmp(argv[1], "init", (size_t)4)) {
         init_project(argv[2]);
+    } else if (argc == 2 && !strncmp(argv[1], "makefile", (size_t)8)) {
+        puts(MAKEFILE);
     } else {
         puts(HELP_MESSAGE);
-        exit(1);
+        return 1;
     }
 }
