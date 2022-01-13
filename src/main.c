@@ -72,6 +72,11 @@ const char SRC_MAKEFILE[] =
 
 void
 gen_dir(char filepath[]) {
+    if (filepath == NULL) {
+        fprintf(stderr, "the filepath is null idk what happened\n");
+        exit(1);
+    }
+
     int exists = mkdir(filepath, 0777);
 
     if (exists) {
@@ -127,7 +132,7 @@ _write(char to[], const char from[], int offset, int length, void (*action)(char
 }
 
 void
-init_project(char project_name[])  {
+init_project(char project_name[], int cprojp) {
     int i_len = (int)strlen(project_name);
     int f_len = 15; // make sure this matches with the longest static string
     int len = i_len + f_len + 1;
@@ -145,7 +150,14 @@ init_project(char project_name[])  {
     _write(project_folder, "/target",         i_len, 7,     &gen_dir);
     _write(project_folder, "/Makefile",       i_len, 9,     &gen_makefile);
     _write(project_folder, "/.gitignore",     i_len, 11,    &gen_gitignore);
-    _write(project_folder, "/src/main.c",     i_len, 11,    &gen_mainfile);
+
+    // TODO bad, pls fix
+    if (cprojp) {
+        _write(project_folder, "/src/main.c",   i_len, 11, &gen_mainfile);
+    } else {
+        _write(project_folder, "/src/main.cpp", i_len, 13, &gen_mainfile);
+    }
+
     _write(project_folder, "/src/Makefile",   i_len, 13,    &gen_srcmakefile); 
     _write(project_folder, "/target/debug",   i_len, 13,    &gen_dir);
     _write(project_folder, "/target/release", i_len, f_len, &gen_dir);
@@ -156,9 +168,17 @@ init_project(char project_name[])  {
 
 int
 main(int argc, char * argv[]) {
-    if (argc == 3 && !strncmp(argv[1], "init", (size_t)4)) {
-        init_project(argv[2]);
-    } else if (argc == 2 && !strncmp(argv[1], "makefile", (size_t)8)) {
+    int i = 1;
+    int cprojp = 1;
+
+    if (argc >= 2 && !strncmp(argv[i], "cpp", (size_t)3)) {
+        i++;
+        cprojp = 0;
+    }
+     
+    if (argc >= 3 && !strncmp(argv[i], "init", (size_t)4)) {
+        init_project(argv[i+1], cprojp);
+    } else if (argc >= 2 && !strncmp(argv[i], "makefile", (size_t)8)) {
         puts(MAKEFILE);
     } else {
         puts(HELP_MESSAGE);
