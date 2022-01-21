@@ -16,59 +16,65 @@ const char HELP_MESSAGE[] =
     "EXAMPLES:\n"
     "    The following example creates a new c project in the current directory.\n"
     "    $ genc init my-new-project\n";
+    
+#define MAKEFILE_C                                                      \
+    "SRC = $(wildcard src/*.c)\n"                                       \
+    "CC = gcc\n"                                                        \
+    "FLAGS = -Wall -Werror -Wextra -Wpedantic -Wformat=2 -Wformat-overflow=2 -Wformat-truncation=2 -Wformat-security -Wnull-dereference -Wstack-protector -Wtrampolines -Walloca -Wvla -Warray-bounds=2 -Wimplicit-fallthrough=3 -Wtraditional-conversion -Wshift-overflow=2 -Wcast-qual -Wstringop-overflow=4 -Wconversion -Warith-conversion -Wlogical-op -Wduplicated-cond -Wduplicated-branches -Wformat-signedness -Wshadow -Wstrict-overflow=4 -Wundef -Wstrict-prototypes -Wswitch-default -Wswitch-enum -Wstack-usage=1000000 -Wcast-align=strict -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fstack-clash-protection -fPIE -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wl,-z,separate-code -pipe -O2\n" \
+    "\n"                                                                \
+    "all: debug\n"                                                      \
+    "\n"                                                                \
+    "debug: OUTPUT = $(DEBUG)\n"                                        \
+    "# Non production ready flags (as of 2021-09-01), https://github.com/google/sanitizers/issues/1324: -fsanitize=pointer-compare -fsanitize=pointer-subtract\n" \
+    "debug: FLAGS += -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer -fsanitize=undefined -fsanitize=bounds-strict -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow $(shell export ASAN_OPTIONS=strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_invalid_pointer_pairs=2) -fanalyzer\n" \
+    "debug: executable\n"                                               \
+    "\n"
+    
+#define MAKEFILE_CPP                                            \
+    "SRC = $(wildcard src/*.cpp)\n"                             \
+    "CC = g++\n"                                                \
+    "FLAGS = -std=c++20 -Wall -Werror -Wextra -Wpedantic -O2\n" \
+    "\n"                                                        \
+    "all: debug\n"                                              \
+    "\n"                                                        \
+    "debug: OUTPUT = $(DEBUG)\n"                                \
+    "debug: FLAGS += -g\n"                                      \
+    "debug: executable\n"                                       \
+    "\n"
 
-const char MAINFILE[] =
-    "#include <stdio.h>\n"
-    "\n"
-    "int\n"
-    "main(void) {\n"
-    "    printf(\"Hello world!\\n\");\n"
-    "}\n";
-
-const char MAKEFILE[] =
-    "PROJECT = $(notdir $(CURDIR))\n"
-    "SRC = $(wildcard src/*.c)\n"
-    "DEBUG = target/debug/$(PROJECT)\n"
-    "RELEASE = target/release/$(PROJECT)\n"
-    "CC = gcc\n"
-    "CFLAGS = -Wall -Werror -Wextra -Wpedantic -Wformat=2 -Wformat-overflow=2 -Wformat-truncation=2 -Wformat-security -Wnull-dereference -Wstack-protector -Wtrampolines -Walloca -Wvla -Warray-bounds=2 -Wimplicit-fallthrough=3 -Wtraditional-conversion -Wshift-overflow=2 -Wcast-qual -Wstringop-overflow=4 -Wconversion -Warith-conversion -Wlogical-op -Wduplicated-cond -Wduplicated-branches -Wformat-signedness -Wshadow -Wstrict-overflow=4 -Wundef -Wstrict-prototypes -Wswitch-default -Wswitch-enum -Wstack-usage=1000000 -Wcast-align=strict -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fstack-clash-protection -fPIE -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wl,-z,separate-code -pipe -O2\n"
-    "LDFLAGS = \n"
-    "\n"
-    "all: debug\n"
-    "\n"
-    "debug: OUTPUT = $(DEBUG)\n"
-    "# Non production ready flags (as of 2021-09-01), https://github.com/google/sanitizers/issues/1324: -fsanitize=pointer-compare -fsanitize=pointer-subtract\n"
-    "debug: CFLAGS += -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer -fsanitize=undefined -fsanitize=bounds-strict -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow $(shell export ASAN_OPTIONS=strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_invalid_pointer_pairs=2) -fanalyzer\n"
-    "debug: executable\n"
-    "\n"
-    "release: OUTPUT = $(RELEASE)\n"
-    "release: executable\n"
-    "\n"
-    "executable: $(SRC)\n"
-    "	$(CC) $(SRC) -o $(OUTPUT) $(CFLAGS) $(LDFLAGS)\n"
-    "\n"
-    ".PHONY: run clean install uninstall\n"
-    "\n"
-    "# write \"make run a=\"...\" for commandline arguments\"\n"
-    "run:\n"
-    "	./$(DEBUG) $(a)\n"
-    "\n"
-    "clean:\n"
-    "	rm -f $(DEBUG) $(RELEASE)\n"
-    "\n"
-    "# installs from release folder only\n"
-    "install:\n"
-    "	ln -s $(CURDIR)/$(RELEASE) ~/.local/bin/\n"
-    "\n"
-    "uninstall:\n"
-    "	rm -f ~/.local/bin/$(PROJECT)\n";
+// x is replaced with c/cpp specific stuff
+#define MAKEFILE(x)                                                     \
+    "PROJECT = $(notdir $(CURDIR))\n"                                   \
+    "DEBUG = target/debug/$(PROJECT)\n"                                 \
+    "RELEASE = target/release/$(PROJECT)\n"                             \
+    x                                                                   \
+    "release: OUTPUT = $(RELEASE)\n"                                    \
+    "release: executable\n"                                             \
+    "\n"                                                                \
+    "executable: $(SRC)\n"                                              \
+    "	$(CC) $(SRC) -o $(OUTPUT) $(FLAGS) \n"                          \
+    "\n"                                                                \
+    ".PHONY: run clean install uninstall\n"                             \
+    "\n"                                                                \
+    "# write \"make run a=\"...\" for commandline arguments\"\n"        \
+    "run:\n"                                                            \
+    "	./$(DEBUG) $(a)\n"                                              \
+    "\n"                                                                \
+    "clean:\n"                                                          \
+    "	rm -f $(DEBUG) $(RELEASE)\n"                                    \
+    "\n"                                                                \
+    "# installs from release folder only\n"                             \
+    "install:\n"                                                        \
+    "	ln -s $(CURDIR)/$(RELEASE) ~/.local/bin/\n"                     \
+    "\n"                                                                \
+    "uninstall:\n"                                                      \
+    "	rm -f ~/.local/bin/$(PROJECT)\n"
 
 const char SRC_MAKEFILE[] =
     "all:\n"
     "	$(MAKE) -C .. $@\n"
     "%:\n"
     "	$(MAKE) -C .. $@\n";
-
 
 void
 gen_dir(char filepath[]) {
@@ -98,9 +104,9 @@ gen_file(char filepath[], const char contents[]) {
     fclose(fp);
 }
 
-void gen_mainfile(char filepath[])    { gen_file(filepath, MAINFILE);     }
-void gen_makefile(char filepath[])    { gen_file(filepath, MAKEFILE);     }
-void gen_gitignore(char filepath[])   { gen_file(filepath, "");           }
+void gen_makefile_c(char filepath[]) { gen_file(filepath, MAKEFILE(MAKEFILE_C)); }
+void gen_makefile_cpp(char filepath[]) { gen_file(filepath, MAKEFILE(MAKEFILE_CPP)); }
+void gen_gitignore(char filepath[]) { gen_file(filepath, ""); }
 void gen_srcmakefile(char filepath[]) { gen_file(filepath, SRC_MAKEFILE); }
 
 void
@@ -148,16 +154,14 @@ init_project(char project_name[], int cprojp) {
     // try to keep these in order from smallest to largest to maybe avoid buffer overflow bugs
     _write(project_folder, "/src",            i_len, 4,     &gen_dir);
     _write(project_folder, "/target",         i_len, 7,     &gen_dir);
-    _write(project_folder, "/Makefile",       i_len, 9,     &gen_makefile);
-    _write(project_folder, "/.gitignore",     i_len, 11,    &gen_gitignore);
-
-    // TODO bad, pls fix
+    
     if (cprojp) {
-        _write(project_folder, "/src/main.c",   i_len, 11, &gen_mainfile);
+        _write(project_folder, "/Makefile",       i_len, 9,     &gen_makefile_c);
     } else {
-        _write(project_folder, "/src/main.cpp", i_len, 13, &gen_mainfile);
+        _write(project_folder, "/Makefile",       i_len, 9,     &gen_makefile_cpp);
     }
-
+    
+    _write(project_folder, "/.gitignore",     i_len, 11,    &gen_gitignore);
     _write(project_folder, "/src/Makefile",   i_len, 13,    &gen_srcmakefile); 
     _write(project_folder, "/target/debug",   i_len, 13,    &gen_dir);
     _write(project_folder, "/target/release", i_len, f_len, &gen_dir);
@@ -179,7 +183,10 @@ main(int argc, char * argv[]) {
     if (argc >= 3 && !strncmp(argv[i], "init", (size_t)4)) {
         init_project(argv[i+1], cprojp);
     } else if (argc >= 2 && !strncmp(argv[i], "makefile", (size_t)8)) {
-        puts(MAKEFILE);
+        if (cprojp)
+            puts(MAKEFILE(MAKEFILE_C));
+        else
+            puts(MAKEFILE(MAKEFILE_CPP));
     } else {
         puts(HELP_MESSAGE);
         return 1;
