@@ -22,8 +22,6 @@ const char HELP_MESSAGE[] =
     "CC = gcc\n"                                                        \
     "FLAGS = -Wall -Werror -Wextra -Wpedantic -Wformat=2 -Wformat-overflow=2 -Wformat-truncation=2 -Wformat-security -Wnull-dereference -Wstack-protector -Wtrampolines -Walloca -Wvla -Warray-bounds=2 -Wimplicit-fallthrough=3 -Wtraditional-conversion -Wshift-overflow=2 -Wcast-qual -Wstringop-overflow=4 -Wconversion -Warith-conversion -Wlogical-op -Wduplicated-cond -Wduplicated-branches -Wformat-signedness -Wshadow -Wstrict-overflow=4 -Wundef -Wstrict-prototypes -Wswitch-default -Wswitch-enum -Wstack-usage=1000000 -Wcast-align=strict -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fstack-clash-protection -fPIE -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack -Wl,-z,separate-code -pipe -O2\n" \
     "\n"                                                                \
-    "all: debug\n"                                                      \
-    "\n"                                                                \
     "debug: OUTPUT = $(DEBUG)\n"                                        \
     "# Non production ready flags (as of 2021-09-01), https://github.com/google/sanitizers/issues/1324: -fsanitize=pointer-compare -fsanitize=pointer-subtract\n" \
     "debug: FLAGS += -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer -fsanitize=undefined -fsanitize=bounds-strict -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow $(shell export ASAN_OPTIONS=strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_invalid_pointer_pairs=2) -fanalyzer\n" \
@@ -35,8 +33,6 @@ const char HELP_MESSAGE[] =
     "CC = g++\n"                                                \
     "FLAGS = -std=c++20 -Wall -Werror -Wextra -Wpedantic -O2\n" \
     "\n"                                                        \
-    "all: debug\n"                                              \
-    "\n"                                                        \
     "debug: OUTPUT = $(DEBUG)\n"                                \
     "debug: FLAGS += -g\n"                                      \
     "debug: executable\n"                                       \
@@ -47,6 +43,13 @@ const char HELP_MESSAGE[] =
     "PROJECT = $(notdir $(CURDIR))\n"                                   \
     "DEBUG = target/debug/$(PROJECT)\n"                                 \
     "RELEASE = target/release/$(PROJECT)\n"                             \
+    "\n"                                                                \
+    "all: mkdir debug\n"                                                \
+    "\n"                                                                \
+    "mkdir:\n"                                                          \
+    "	mkdir -p ./target/debug\n"                                      \
+    "	mkdir -p ./target/release\n"                                    \
+    "\n"                                                                \
     x                                                                   \
     "release: OUTPUT = $(RELEASE)\n"                                    \
     "release: executable\n"                                             \
@@ -140,7 +143,7 @@ _write(char to[], const char from[], int offset, int length, void (*action)(char
 void
 init_project(char project_name[], int cprojp) {
     int i_len = (int)strlen(project_name);
-    int f_len = 15; // make sure this matches with the longest static string
+    int f_len = 13; // make sure this matches with the longest static string
     int len = i_len + f_len + 1;
 
     char * project_folder = (char *)malloc(sizeof(char) * (size_t)len);
@@ -152,19 +155,11 @@ init_project(char project_name[], int cprojp) {
     _write(project_folder, project_name, 0, i_len, &gen_dir);
 
     // try to keep these in order from smallest to largest to maybe avoid buffer overflow bugs
-    _write(project_folder, "/src",            i_len, 4,     &gen_dir);
-    _write(project_folder, "/target",         i_len, 7,     &gen_dir);
+    _write(project_folder, "/src",          i_len, 4,     &gen_dir);
+    _write(project_folder, "/Makefile",     i_len, 9,     cprojp ? &gen_makefile_c : &gen_makefile_cpp);
+    _write(project_folder, "/.gitignore",   i_len, 11,    &gen_gitignore);
+    _write(project_folder, "/src/Makefile", i_len, f_len, &gen_srcmakefile);
     
-    if (cprojp) {
-        _write(project_folder, "/Makefile",       i_len, 9,     &gen_makefile_c);
-    } else {
-        _write(project_folder, "/Makefile",       i_len, 9,     &gen_makefile_cpp);
-    }
-    
-    _write(project_folder, "/.gitignore",     i_len, 11,    &gen_gitignore);
-    _write(project_folder, "/src/Makefile",   i_len, 13,    &gen_srcmakefile); 
-    _write(project_folder, "/target/debug",   i_len, 13,    &gen_dir);
-    _write(project_folder, "/target/release", i_len, f_len, &gen_dir);
     gen_git_dir(project_name);
 
     free(project_folder);
