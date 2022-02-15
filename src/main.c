@@ -24,6 +24,7 @@ const char HELP_MESSAGE[] =
     "debug: OUTPUT = $(DEBUG)\n"                                        \
     "# Non production ready flags (as of 2021-09-01), https://github.com/google/sanitizers/issues/1324: -fsanitize=pointer-compare -fsanitize=pointer-subtract\n" \
     "debug: FLAGS += -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer -fsanitize=undefined -fsanitize=bounds-strict -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow $(shell export ASAN_OPTIONS=strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_invalid_pointer_pairs=2) -fanalyzer\n" \
+    "\n"                                                                \
     "debug: executable\n"                                               \
     "\n"
     
@@ -31,6 +32,7 @@ const char HELP_MESSAGE[] =
     "SRC = $(wildcard src/*.cpp)\n"                             \
     "CC = g++\n"                                                \
     "FLAGS = -std=c++20 -Wall -Werror -Wextra -Wpedantic -O2\n" \
+    "\n"
     "debug: OUTPUT = $(DEBUG)\n"                                \
     "debug: FLAGS += -g\n"                                      \
     "debug: executable\n"                                       \
