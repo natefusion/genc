@@ -109,7 +109,7 @@ gen_file(char filepath[], const char contents[]) {
 
 void gen_makefile_c(char filepath[]) { gen_file(filepath, MAKEFILE(MAKEFILE_C)); }
 void gen_makefile_cpp(char filepath[]) { gen_file(filepath, MAKEFILE(MAKEFILE_CPP)); }
-void gen_gitignore(char filepath[]) { gen_file(filepath, ""); }
+void gen_gitignore(char filepath[]) { gen_file(filepath, "/target"); }
 void gen_srcmakefile(char filepath[]) { gen_file(filepath, SRC_MAKEFILE); }
 
 void
