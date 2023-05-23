@@ -31,7 +31,7 @@ const char HELP_MESSAGE[] =
 #define MAKEFILE_CPP                                            \
     "SRC = $(wildcard src/*.cpp)\n"                             \
     "CC = g++\n"                                                \
-    "FLAGS = -Wall -O2\n"                                       \
+    "FLAGS = -Wall -pipe -O2\n"                                 \
     "\n"                                                        \
     "debug: OUTPUT = $(DEBUG)\n"                                \
     "debug: FLAGS += -g\n"                                      \
