@@ -18,60 +18,71 @@ const char HELP_MESSAGE[] =
     "    $ genc init my-new-project\n";
     
 #define MAKEFILE_C                                                      \
-    "SRC = $(wildcard src/*.c)\n"                                       \
-    "CC = gcc\n"                                                        \
-    "FLAGS = -Wall -pipe -O2"                                           \
-    "\n"                                                                \
-    "debug: OUTPUT = $(DEBUG)\n"                                        \
-    "# Non production ready flags (as of 2021-09-01), https://github.com/google/sanitizers/issues/1324: -fsanitize=pointer-compare -fsanitize=pointer-subtract\n" \
-    "debug: FLAGS += -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer -fsanitize=undefined -fsanitize=bounds-strict -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow $(shell export ASAN_OPTIONS=strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_invalid_pointer_pairs=2) -fanalyzer -g\n" \
-    "debug: executable\n"                                               \
-    "\n"
+    "CC := gcc\n"                                                       \
+    "SRCS := $(wildcard $(SRC_DIR)/*.c)\n"                              \
     
 #define MAKEFILE_CPP                                            \
-    "SRC = $(wildcard src/*.cpp)\n"                             \
     "CC = g++\n"                                                \
-    "FLAGS = -Wall -pipe -O2\n"                                 \
-    "\n"                                                        \
-    "debug: OUTPUT = $(DEBUG)\n"                                \
-    "debug: FLAGS += -g\n"                                      \
-    "debug: executable\n"                                       \
-    "\n"
+    "SRCS := $(wildcard $(SRC_DIR)/*.cpp)\n"                    \
 
 // x is replaced with c/cpp specific stuff
 #define MAKEFILE(x)                                                     \
-    "PROJECT = $(notdir $(CURDIR))\n"                                   \
-    "DEBUG = target/debug/$(PROJECT)\n"                                 \
-    "RELEASE = target/release/$(PROJECT)\n"                             \
+    "# https://github.com/clemedon/makefile_tutor\n"                    \
+    "# https://makefiletutorial.com\n"                                  \
     "\n"                                                                \
-    "all: mkdir debug\n"                                                \
+    "DEBUG := ./build/debug\n"                                          \
+    "RELEASE := ./build/release\n"                                      \
     "\n"                                                                \
-    "mkdir:\n"                                                          \
-    "	mkdir -p ./target/debug\n"                                      \
-    "	mkdir -p ./target/release\n"                                    \
+    "mode ?= debug\n"                                                   \
+    "OBJ_DIR ?= $(DEBUG)\n"                                             \
+    "SRC_DIR := src\n"                                                  \
     "\n"                                                                \
     x                                                                   \
-    "release: OUTPUT = $(RELEASE)\n"                                    \
-    "release: executable\n"                                             \
     "\n"                                                                \
-    "executable: $(SRC)\n"                                              \
-    "	$(CC) $(SRC) -o $(OUTPUT) $(FLAGS) \n"                          \
+    "CFLAGS := -Wall\n"                                                 \
+    "CPPFLAGS := -MMD -MP\n"                                            \
     "\n"                                                                \
-    ".PHONY: run clean install uninstall\n"                             \
+    "ifeq ($(mode), debug)\n"                                           \
+    "	CFLAGS += -g\n"                                                 \
+    "else\n"                                                            \
+    "	ifeq ($(mode), release)\n"                                      \
+    "		CFLAGS += -O2\n"                                            \
+    "		OBJ_DIR = $(RELEASE)\n"                                     \
+    "	endif\n"                                                        \
+    "endif\n"                                                           \
     "\n"                                                                \
-    "# write \"make run a=\"...\" for commandline arguments\"\n"        \
-    "run:\n"                                                            \
-    "	./$(DEBUG) $(a)\n"                                              \
+    "OBJS := $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)\n"                   \
+    "DEPS := $(OBJS:.o=.d)\n"                                           \
+    "\n"                                                                \
+    "NAME := $(notdir $(CURDIR))\n"                                     \
+    "EXECUTABLE := $(OBJ_DIR)/$(NAME)\n"                                \
+    "\n"                                                                \
+    "DIR_DUP = mkdir -p $(@D)\n"                                        \
+    "\n"                                                                \
+    "all: $(EXECUTABLE)\n"                                              \
+    "\n"                                                                \
+    "$(EXECUTABLE): $(OBJS)\n"                                          \
+    "	$(CC) $^ -o $@\n"                                               \
+    "\n"                                                                \
+    "$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c\n"                                  \
+    "	$(DIR_DUP)\n"                                                   \
+    "	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<\n"                      \
+    "\n"                                                                \
+    "-include $(DEPS)\n"                                                \
+    "\n"                                                                \
+    ".PHONY: clean install uninstall run test\n"                        \
     "\n"                                                                \
     "clean:\n"                                                          \
-    "	rm -f $(DEBUG) $(RELEASE)\n"                                    \
+    "	rm -f $(EXECUTABLE) $(OBJS) $(DEPS)\n"                          \
     "\n"                                                                \
-    "# installs from release folder only\n"                             \
     "install:\n"                                                        \
-    "	ln -s $(CURDIR)/$(RELEASE) ~/.local/bin/\n"                     \
+    "	cp $(RELEASE)/$(NAME) ~/.local/bin/\n"                          \
     "\n"                                                                \
     "uninstall:\n"                                                      \
-    "	rm -f ~/.local/bin/$(PROJECT)\n"
+    "	rm -f ~/.local/bin/$(NAME)\n"                                   \
+    "\n"                                                                \
+    "run:\n"                                                            \
+    "	-$(EXECUTABLE)\n"                                               \
 
 const char SRC_MAKEFILE[] =
     "all:\n"

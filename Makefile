@@ -35,7 +35,7 @@ clean:
 
 # installs from release folder only
 install:
-	ln -s $(CURDIR)/$(RELEASE) ~/.local/bin/
+	cp $(CURDIR)/$(RELEASE) ~/.local/bin/
 
 uninstall:
 	rm -f ~/.local/bin/$(PROJECT)
