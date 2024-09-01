@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <git2.h>
 
-const char HELP_MESSAGE[] =
+const char* HELP_MESSAGE =
     "C project generator\n"
     "\n"
     "USAGE: genc ...\n"
@@ -19,11 +19,11 @@ const char HELP_MESSAGE[] =
     
 #define MAKEFILE_C                                                      \
     "CC := gcc\n"                                                       \
-    "SRCS := $(wildcard $(SRC_DIR)/*.c)\n"                              \
+    "SRCS := $(wildcard $(SRC_DIR)/*.c)\n"
     
 #define MAKEFILE_CPP                                            \
     "CC = g++\n"                                                \
-    "SRCS := $(wildcard $(SRC_DIR)/*.cpp)\n"                    \
+    "SRCS := $(wildcard $(SRC_DIR)/*.cpp)\n"
 
 // x is replaced with c/cpp specific stuff
 #define MAKEFILE(x)                                                     \
@@ -82,16 +82,22 @@ const char HELP_MESSAGE[] =
     "	rm -f ~/.local/bin/$(NAME)\n"                                   \
     "\n"                                                                \
     "run:\n"                                                            \
-    "	-$(EXECUTABLE)\n"                                               \
+    "	-$(EXECUTABLE)\n"
 
-const char SRC_MAKEFILE[] =
+const char *GITIGNORE =
+    "/build\n"
+    "*~\n"
+    "compile_commands.json\n"
+    "/.cache\n";
+
+const char *SRC_MAKEFILE =
     "all:\n"
     "	$(MAKE) -C .. $@\n"
     "%:\n"
     "	$(MAKE) -C .. $@\n";
 
 void
-gen_dir(char filepath[]) {
+gen_dir(const char *filepath) {
     if (filepath == NULL) {
         fprintf(stderr, "the filepath is null idk what happened\n");
         exit(1);
@@ -106,7 +112,7 @@ gen_dir(char filepath[]) {
 }
 
 void
-gen_file(char filepath[], const char contents[]) {
+gen_file(const char *filepath, const char *contents) {
     FILE * fp = fopen(filepath, "w");
     
     if (fp == NULL) {
@@ -118,13 +124,13 @@ gen_file(char filepath[], const char contents[]) {
     fclose(fp);
 }
 
-void gen_makefile_c(char filepath[]) { gen_file(filepath, MAKEFILE(MAKEFILE_C)); }
-void gen_makefile_cpp(char filepath[]) { gen_file(filepath, MAKEFILE(MAKEFILE_CPP)); }
-void gen_gitignore(char filepath[]) { gen_file(filepath, "/target"); }
-void gen_srcmakefile(char filepath[]) { gen_file(filepath, SRC_MAKEFILE); }
+void gen_makefile_c(const char *filepath) { gen_file(filepath, MAKEFILE(MAKEFILE_C)); }
+void gen_makefile_cpp(const char *filepath) { gen_file(filepath, MAKEFILE(MAKEFILE_CPP)); }
+void gen_gitignore(const char *filepath) { gen_file(filepath, GITIGNORE); }
+void gen_srcmakefile(const char *filepath) { gen_file(filepath, SRC_MAKEFILE); }
 
 void
-gen_git_dir(char project_name[]) {
+gen_git_dir(const char *project_name) {
     // With help from https://libgit2.org/docs/guides/101-samples/
     git_libgit2_init(); 
     git_repository * repo = NULL;
@@ -144,7 +150,7 @@ gen_git_dir(char project_name[]) {
 
 // Calling this function "write" causes weird function shadowing issues caused by the libgit2 library
 void
-_write(char to[], const char from[], int offset, int length, void (*action)(char [])) {
+_write(char to[], const char from[], int offset, int length, void (*action)(const char *)) {
     for (int i = 0; i < length; i++)
         to[i + offset] = from[i];
 
@@ -152,7 +158,7 @@ _write(char to[], const char from[], int offset, int length, void (*action)(char
 }
 
 void
-init_project(char project_name[], int cprojp) {
+init_project(const char *project_name, int cprojp) {
     int i_len = (int)strlen(project_name);
     int f_len = 13; // make sure this matches with the longest static string
     int len = i_len + f_len + 1;
