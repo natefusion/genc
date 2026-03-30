@@ -26,7 +26,7 @@ const char* HELP_MESSAGE =
     "SRCS := $(wildcard $(SRC_DIR)/*.cpp)\n"
 
 // x is replaced with c/cpp specific stuff
-#define MAKEFILE(x)                                                     \
+#define MAKEFILE(x, ext)                                                     \
     "# https://github.com/clemedon/makefile_tutor\n"                    \
     "# https://makefiletutorial.com\n"                                  \
     "\n"                                                                \
@@ -51,7 +51,7 @@ const char* HELP_MESSAGE =
     "	endif\n"                                                        \
     "endif\n"                                                           \
     "\n"                                                                \
-    "OBJS := $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)\n"                   \
+    "OBJS := $(SRCS:$(SRC_DIR)/%."ext"=$(OBJ_DIR)/%.o)\n"                   \
     "DEPS := $(OBJS:.o=.d)\n"                                           \
     "\n"                                                                \
     "NAME := $(notdir $(CURDIR))\n"                                     \
@@ -64,7 +64,7 @@ const char* HELP_MESSAGE =
     "$(EXECUTABLE): $(OBJS)\n"                                          \
     "	$(CC) $^ -o $@\n"                                               \
     "\n"                                                                \
-    "$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c\n"                                  \
+    "$(OBJ_DIR)/%.o: $(SRC_DIR)/%."ext"\n"                                  \
     "	$(DIR_DUP)\n"                                                   \
     "	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<\n"                      \
     "\n"                                                                \
@@ -124,8 +124,8 @@ gen_file(const char *filepath, const char *contents) {
     fclose(fp);
 }
 
-void gen_makefile_c(const char *filepath) { gen_file(filepath, MAKEFILE(MAKEFILE_C)); }
-void gen_makefile_cpp(const char *filepath) { gen_file(filepath, MAKEFILE(MAKEFILE_CPP)); }
+void gen_makefile_c(const char *filepath) { gen_file(filepath, MAKEFILE(MAKEFILE_C, "c")); }
+void gen_makefile_cpp(const char *filepath) { gen_file(filepath, MAKEFILE(MAKEFILE_CPP, "cpp")); }
 void gen_gitignore(const char *filepath) { gen_file(filepath, GITIGNORE); }
 void gen_srcmakefile(const char *filepath) { gen_file(filepath, SRC_MAKEFILE); }
 
@@ -196,9 +196,9 @@ main(int argc, char * argv[]) {
         init_project(argv[i+1], cprojp);
     } else if (argc >= 2 && !strncmp(argv[i], "makefile", (size_t)8)) {
         if (cprojp)
-            puts(MAKEFILE(MAKEFILE_C));
+            puts(MAKEFILE(MAKEFILE_C, "c"));
         else
-            puts(MAKEFILE(MAKEFILE_CPP));
+            puts(MAKEFILE(MAKEFILE_CPP, "cpp"));
     } else {
         puts(HELP_MESSAGE);
         return 1;
