@@ -51,7 +51,7 @@ const char* HELP_MESSAGE =
     "	endif\n"                                                        \
     "endif\n"                                                           \
     "\n"                                                                \
-    "OBJS := $(SRCS:$(SRC_DIR)/%."ext"=$(OBJ_DIR)/%.o)\n"                   \
+    "OBJS := $(SRCS:$(SRC_DIR)/%."ext"=$(OBJ_DIR)/%.o)\n"               \
     "DEPS := $(OBJS:.o=.d)\n"                                           \
     "\n"                                                                \
     "NAME := $(notdir $(CURDIR))\n"                                     \
@@ -62,11 +62,11 @@ const char* HELP_MESSAGE =
     "all: $(EXECUTABLE)\n"                                              \
     "\n"                                                                \
     "$(EXECUTABLE): $(OBJS)\n"                                          \
-    "	$(CC) $^ -o $@\n"                                               \
+    "	$(CC) $^ -o $@ $(CFLAGS)\n"                                     \
     "\n"                                                                \
-    "$(OBJ_DIR)/%.o: $(SRC_DIR)/%."ext"\n"                                  \
+    "$(OBJ_DIR)/%.o: $(SRC_DIR)/%."ext"\n"                              \
     "	$(DIR_DUP)\n"                                                   \
-    "	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<\n"                      \
+    "	$(CC) -c -o $@ $< $(CFLAGS) $(CPPFLAGS)\n"                      \
     "\n"                                                                \
     "-include $(DEPS)\n"                                                \
     "\n"                                                                \
